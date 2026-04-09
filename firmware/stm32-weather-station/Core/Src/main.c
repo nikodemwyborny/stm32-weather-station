@@ -23,7 +23,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <stdio.h>
+#include <string.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -44,6 +45,8 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+volatile uint8_t uartReady = 1;
+char komunikat[50];
 
 /* USER CODE END PV */
 
@@ -96,6 +99,13 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  if (uartReady)
+	  {
+		  sprintf(komunikat, "system running\r\n");
+		  HAL_UART_Transmit_IT(&huart2, (uint8_t*)komunikat, strlen(komunikat));
+		  uartReady = 0;
+	  }
+	  HAL_Delay(1000);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -151,7 +161,13 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
+{
+	if (huart->Instance == USART2)
+	{
+		uartReady = 1;
+	}
+}
 /* USER CODE END 4 */
 
 /**
