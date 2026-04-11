@@ -103,9 +103,22 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+
+
 	  if (uartReady)
 	  {
-		  sprintf(komunikat, "system running\r\n");
+		  if (HAL_I2C_IsDeviceReady(&hi2c1, 0x76 << 1, 1, 100) == HAL_OK)
+		  {
+			  uint8_t id;
+			  HAL_I2C_Mem_Read(&hi2c1, 0x76 << 1, 0xD0, 1, &id, 1, 100);
+
+			  sprintf(komunikat, "BME280 ID: 0x%X\r\n", id);
+		  }
+		  else
+		  {
+			  sprintf(komunikat, "Device NOT found\r\n");
+		  }
+
 		  HAL_UART_Transmit_IT(&huart2, (uint8_t*)komunikat, strlen(komunikat));
 		  uartReady = 0;
 	  }

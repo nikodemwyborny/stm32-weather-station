@@ -3,7 +3,7 @@
 STM32-based weather station using BME280 sesnor and I2C OLED display.
 
 ## Planned Features
-- [] UART communication for debuging
+- [*] UART communication for debuging
 - [] Temperature mesurment
 - [] Humidity mesurment
 - [] Pressure mesurment
