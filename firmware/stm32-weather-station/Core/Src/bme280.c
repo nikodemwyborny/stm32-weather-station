@@ -31,6 +31,7 @@ uint8_t BME280_ReadID(I2C_HandleTypeDef *hi2c)
 void BME280_Init(I2C_HandleTypeDef *hi2c)
 {
 	uint8_t data = 0x27;
+
 	HAL_I2C_Mem_Write(hi2c, BME280_ADDR, 0xF4, 1, &data, 1, 100);
 }
 
@@ -67,6 +68,17 @@ void BME280_ReadCalibration(I2C_HandleTypeDef *hi2c)
 	calib.dig_P7 = (data[19] << 8) | data[18];
 	calib.dig_P8 = (data[21] << 8) | data[20];
 	calib.dig_P9 = (data[23] << 8) | data[22];
+
+	uint8_t h_data[7];
+
+	HAL_I2C_Mem_Read(hi2c, BME280_ADDR, 0xA1, 1, &calib.dig_H1, 1, 100);
+	HAL_I2C_Mem_Read(hi2c, BME280_ADDR, 0xE1, 1, h_data, 7, 100);
+
+	calib.dig_H2 = (int16_t)((h_data[1] << 8) | h_data[0]);
+	calib.dig_H3 = h_data[2];
+	calib.dig_H4 = (int16_t)((h_data[3] << 4) | (h_data[4] & 0x0F));
+	calib.dig_H5 = (int16_t)((h_data[5] << 4) | (h_data[4] >> 4));
+	calib.dig_H6 = (int8_t)h_data[6];
 }
 
 int32_t BME280_CompensateTemperature(int32_t adc_T)
@@ -126,4 +138,40 @@ int32_t BME280_CompensatePressure(int32_t adc_P)
 
     return (int32_t)(p / 256); // Pa
 }
+
+int32_t BME280_ReadRawHumidity(I2C_HandleTypeDef *hi2c)
+{
+	uint8_t data [2];
+	int32_t rawHumidity;
+
+	HAL_I2C_Mem_Read(hi2c, BME280_ADDR, 0xFD, 1, data, 2, 100);
+
+	rawHumidity = ((int32_t)data[0] << 8) | data[1];
+
+	return rawHumidity;
+}
+
+int32_t BME280_CompensateHumidity(int32_t adc_H)
+{
+    int32_t v_x1_u32r;
+
+    v_x1_u32r = (t_fine - ((int32_t)76800));
+
+    v_x1_u32r = (((((adc_H << 14) - (((int32_t)calib.dig_H4) << 20) -
+                    (((int32_t)calib.dig_H5) * v_x1_u32r)) + ((int32_t)16384)) >> 15) *
+                  (((((((v_x1_u32r * ((int32_t)calib.dig_H6)) >> 10) *
+                       (((v_x1_u32r * ((int32_t)calib.dig_H3)) >> 11) +
+                        ((int32_t)32768))) >> 10) +
+                     ((int32_t)2097152)) * ((int32_t)calib.dig_H2) + 8192) >> 14));
+
+    v_x1_u32r = (v_x1_u32r -
+                (((((v_x1_u32r >> 15) * (v_x1_u32r >> 15)) >> 7) *
+                  ((int32_t)calib.dig_H1)) >> 4));
+
+    v_x1_u32r = (v_x1_u32r < 0 ? 0 : v_x1_u32r);
+    v_x1_u32r = (v_x1_u32r > 419430400 ? 419430400 : v_x1_u32r);
+
+    return (v_x1_u32r >> 12); // % * 1024
+}
+
 

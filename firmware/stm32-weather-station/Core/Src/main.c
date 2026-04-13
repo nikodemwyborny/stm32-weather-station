@@ -50,7 +50,7 @@
 
 /* USER CODE BEGIN PV */
 volatile uint8_t uartReady = 1;
-char komunikat[50];
+char komunikat[100];
 
 /* USER CODE END PV */
 
@@ -128,11 +128,17 @@ int main(void)
 			 int32_t rawPressure = BME280_ReadRawPressure(&hi2c1);
 			 int32_t pressure = BME280_CompensatePressure(rawPressure);
 
-			 int32_t press_int = pressure / 100;
 
-			 sprintf(komunikat, "Temp: %d.%02d C | P: %ld hPa\r\n",
+			 int32_t rawHumidity = BME280_ReadRawHumidity(&hi2c1);
+			 int32_t humidity = BME280_CompensateHumidity(rawHumidity);
+
+			 int32_t hum_int = humidity / 1024;
+			 int32_t hum_dec = (humidity % 1024) * 100 /1024;
+
+			 sprintf(komunikat, "Temp: %d.%02d C | P: %ld hPa | H: %ld.%02ld %%\r\n",
 					 temp_int, temp_dec,
-					 press_int);
+					 pressure/100,
+					 hum_int, hum_dec);
 
 		  }
 		  else
