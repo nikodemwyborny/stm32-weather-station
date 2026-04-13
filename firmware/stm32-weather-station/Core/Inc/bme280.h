@@ -7,4 +7,8 @@
 
 uint8_t BME280_ReadID(I2C_HandleTypeDef *hi2c);
 
+void BME280_Init(I2C_HandleTypeDef *hi2c);
+
+int32_t BME280_ReadRawTemp(I2C_HandleTypeDef *hi2c);
+
 #endif

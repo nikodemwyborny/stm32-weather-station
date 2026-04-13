@@ -98,7 +98,7 @@ int main(void)
   MX_USART2_UART_Init();
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
-
+  BME280_Init(&hi2c1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -111,9 +111,10 @@ int main(void)
 	  {
 		  if (HAL_I2C_IsDeviceReady(&hi2c1, BME280_ADDR, 1, 100) == HAL_OK)
 		  {
-			  uint8_t id = BME280_ReadID(&hi2c1);
+			 int32_t rawTemp = BME280_ReadRawTemp(&hi2c1);
 
-			  sprintf(komunikat, "BME280 ID: 0x%X\r\n", id);
+			 sprintf(komunikat, "Raw temp; %ld\r\n", rawTemp);
+			 HAL_UART_Transmit_IT(&huart2, (uint8_t*)komunikat, strlen(komunikat));
 		  }
 		  else
 		  {
