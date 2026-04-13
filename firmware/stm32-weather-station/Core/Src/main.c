@@ -111,20 +111,28 @@ int main(void)
 
 	  if (uartReady)
 	  {
+
 		  if (HAL_I2C_IsDeviceReady(&hi2c1, BME280_ADDR, 1, 100) == HAL_OK)
 		  {
-//			 int32_t raw = BME280_ReadRawTemp(&hi2c1);
+
 //
 //			 sprintf(komunikat, "RAW: %ld\r\n", raw);
 //			 HAL_UART_Transmit(&huart2, (uint8_t*)komunikat, strlen(komunikat), 100);
 
-
-			 int32_t temp = BME280_ReadTemperature(&hi2c1);
+			 int32_t rawTemp = BME280_ReadRawTemp(&hi2c1);
+			 int32_t temp = BME280_CompensateTemperature(rawTemp);
 
 			 int8_t temp_int = temp / 100;
 			 int8_t temp_dec = temp % 100;
 
-			 sprintf(komunikat, "Temp: %d.%02d C\r\n", temp_int, temp_dec);
+			 int32_t rawPressure = BME280_ReadRawPressure(&hi2c1);
+			 int32_t pressure = BME280_CompensatePressure(rawPressure);
+
+			 int32_t press_int = pressure / 100;
+
+			 sprintf(komunikat, "Temp: %d.%02d C | P: %ld hPa\r\n",
+					 temp_int, temp_dec,
+					 press_int);
 
 		  }
 		  else
