@@ -15,6 +15,7 @@
   *
   ******************************************************************************
   */
+
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
@@ -27,6 +28,7 @@
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
 #include <string.h>
+#include "bme280.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -107,10 +109,9 @@ int main(void)
 
 	  if (uartReady)
 	  {
-		  if (HAL_I2C_IsDeviceReady(&hi2c1, 0x76 << 1, 1, 100) == HAL_OK)
+		  if (HAL_I2C_IsDeviceReady(&hi2c1, BME280_ADDR, 1, 100) == HAL_OK)
 		  {
-			  uint8_t id;
-			  HAL_I2C_Mem_Read(&hi2c1, 0x76 << 1, 0xD0, 1, &id, 1, 100);
+			  uint8_t id = BME280_ReadID(&hi2c1);
 
 			  sprintf(komunikat, "BME280 ID: 0x%X\r\n", id);
 		  }
