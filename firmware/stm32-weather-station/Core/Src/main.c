@@ -99,22 +99,33 @@ int main(void)
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
   BME280_Init(&hi2c1);
+  HAL_Delay(100);
+  BME280_ReadCalibration(&hi2c1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-
+//	  BME280_DebugCalibration();
 
 	  if (uartReady)
 	  {
 		  if (HAL_I2C_IsDeviceReady(&hi2c1, BME280_ADDR, 1, 100) == HAL_OK)
 		  {
-			 int32_t rawTemp = BME280_ReadRawTemp(&hi2c1);
+//			 int32_t raw = BME280_ReadRawTemp(&hi2c1);
+//
+//			 sprintf(komunikat, "RAW: %ld\r\n", raw);
+//			 HAL_UART_Transmit(&huart2, (uint8_t*)komunikat, strlen(komunikat), 100);
 
-			 sprintf(komunikat, "Raw temp; %ld\r\n", rawTemp);
-			 HAL_UART_Transmit_IT(&huart2, (uint8_t*)komunikat, strlen(komunikat));
+
+			 int32_t temp = BME280_ReadTemperature(&hi2c1);
+
+			 int8_t temp_int = temp / 100;
+			 int8_t temp_dec = temp % 100;
+
+			 sprintf(komunikat, "Temp: %d.%02d C\r\n", temp_int, temp_dec);
+
 		  }
 		  else
 		  {
