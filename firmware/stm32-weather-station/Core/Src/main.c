@@ -30,6 +30,9 @@
 #include <stdio.h>
 #include <string.h>
 #include "bme280.h"
+
+#include "ssd1306.h"
+#include "ssd1306_fonts.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -107,6 +110,10 @@ int main(void)
   BME280_Init(&hi2c1);
   HAL_Delay(100);
   BME280_ReadCalibration(&hi2c1);
+
+  ssd1306_Init();
+  ssd1306_Fill(Black);
+  ssd1306_UpdateScreen();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -120,6 +127,10 @@ int main(void)
 			measureFlag = 0;
 		  if (HAL_I2C_IsDeviceReady(&hi2c1, BME280_ADDR, 1, 100) == HAL_OK)
 		  {
+
+			  ssd1306_SetCursor(0, 0);
+			  ssd1306_WriteString("Hello", Font_7x10, White);
+			  ssd1306_UpdateScreen();
 
 			 int32_t rawTemp = BME280_ReadRawTemp(&hi2c1);
 			 int32_t temp = BME280_CompensateTemperature(rawTemp);
