@@ -21,6 +21,7 @@
 #include "main.h"
 #include "dma.h"
 #include "i2c.h"
+#include "tim.h"
 #include "usart.h"
 #include "gpio.h"
 
@@ -49,6 +50,8 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+volatile uint8_t measureFlag = 0;
+
 volatile uint8_t uartReady = 1;
 char komunikat[100];
 
@@ -97,7 +100,10 @@ int main(void)
   MX_DMA_Init();
   MX_USART2_UART_Init();
   MX_I2C1_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
+  HAL_TIM_Base_Start_IT(&htim3);
+
   BME280_Init(&hi2c1);
   HAL_Delay(100);
   BME280_ReadCalibration(&hi2c1);
@@ -109,15 +115,11 @@ int main(void)
   {
 //	  BME280_DebugCalibration();
 
-	  if (uartReady)
-	  {
-
+		if (measureFlag && uartReady)
+		{
+			measureFlag = 0;
 		  if (HAL_I2C_IsDeviceReady(&hi2c1, BME280_ADDR, 1, 100) == HAL_OK)
 		  {
-
-//
-//			 sprintf(komunikat, "RAW: %ld\r\n", raw);
-//			 HAL_UART_Transmit(&huart2, (uint8_t*)komunikat, strlen(komunikat), 100);
 
 			 int32_t rawTemp = BME280_ReadRawTemp(&hi2c1);
 			 int32_t temp = BME280_CompensateTemperature(rawTemp);
@@ -148,12 +150,13 @@ int main(void)
 
 		  HAL_UART_Transmit_IT(&huart2, (uint8_t*)komunikat, strlen(komunikat));
 		  uartReady = 0;
+		}
 	  }
-	  HAL_Delay(1000);
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-  }
+
   /* USER CODE END 3 */
 }
 
@@ -211,6 +214,14 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 	{
 		uartReady = 1;
 	}
+}
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+    if (htim->Instance == TIM3)
+    {
+        measureFlag = 1;
+    }
 }
 /* USER CODE END 4 */
 
