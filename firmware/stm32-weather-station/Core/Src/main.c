@@ -128,9 +128,7 @@ int main(void)
 		  if (HAL_I2C_IsDeviceReady(&hi2c1, BME280_ADDR, 1, 100) == HAL_OK)
 		  {
 
-			  ssd1306_SetCursor(0, 0);
-			  ssd1306_WriteString("Hello", Font_7x10, White);
-			  ssd1306_UpdateScreen();
+
 
 			 int32_t rawTemp = BME280_ReadRawTemp(&hi2c1);
 			 int32_t temp = BME280_CompensateTemperature(rawTemp);
@@ -147,6 +145,25 @@ int main(void)
 
 			 int32_t hum_int = humidity / 1024;
 			 int32_t hum_dec = (humidity % 1024) * 100 /1024;
+
+			 ssd1306_Fill(Black);
+
+			 ssd1306_SetCursor(0, 0);
+			 char buf[20];
+			 sprintf(buf, "Temp: %d.%02d C", temp_int, temp_dec);
+			 ssd1306_SetCursor(0, 12);
+			 ssd1306_WriteString(buf, Font_7x10, White);
+
+			 sprintf(buf, "P: %ld hPa", pressure/100);
+			 ssd1306_SetCursor(0, 24);
+			 ssd1306_WriteString(buf, Font_7x10, White);
+
+			 sprintf(buf, "H: %ld.%02ld %%", hum_int, hum_dec);
+			 ssd1306_SetCursor(0, 36);
+			 ssd1306_WriteString(buf, Font_7x10, White);
+
+
+			 ssd1306_UpdateScreen();
 
 			 sprintf(komunikat, "Temp: %d.%02d C | P: %ld hPa | H: %ld.%02ld %%\r\n",
 					 temp_int, temp_dec,

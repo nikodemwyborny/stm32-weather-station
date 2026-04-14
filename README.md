@@ -7,7 +7,7 @@ STM32-based weather station using BME280 sesnor and I2C OLED display.
 - [*] Temperature mesurment
 - [*] Humidity mesurment
 - [*] Pressure mesurment
-- [] OLED display (I2C)
+- [*] OLED display (I2C)
 
 ## Future Ideas
 - Integrate FreeRTOS for task-based system architecture
